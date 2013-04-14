@@ -5,6 +5,14 @@
  * Copyright (C) 2012 Jason T. Stoudt
  * Released under the MIT license
  * http://enscrollplugin.com/license.html
+ * ========================================================
+ *
+ * tellibus fork by A. Bennouna
+ * 
+ * http://tellibus.com
+ *
+ * Shows appropriate scrollbars in case of RTL elements.
+ * 
  **/
 
 // Don't clobber any existing jQuery.browser in case it's different
@@ -430,7 +438,11 @@
 				var $this = $( this ),
 					data = $this.data( 'enscroll' ),
 					positionElem = function( elem, x, y ) {
-						elem.style.left = x + 'px';
+    					if ( data.settings.RTLdirection ) {
+                            elem.style.right = x + 'px';
+                        } else {
+                            elem.style.left = x + 'px';
+                        }
 						elem.style.top = y + 'px';
 					},
 					getComputedValue = function( elem, property ) {
@@ -534,7 +546,7 @@
 						track.style.width = trackWidth + 'px';
 						handle.style.width = handleWidth + 'px';
 						if ( pct < 1 ) {
-							pct = $this.scrollLeft() / ( this.scrollWidth - $this.width() );
+							pct = ($this.scrollLeft() + (settings.verticalScrolling && settings.RTLdirection ? $( data.verticalTrackWrapper ).find( '.enscroll-track' ).outerWidth() : 0)) / ( this.scrollWidth - $this.width() );
 							handle.style.left = ( pct * ( trackWidth - handleWidth ) ) + 'px';
 							trackWrapper.style.display = 'block';
 						}
@@ -718,7 +730,8 @@
 			cornerClass: 'scrollbar-corner',
 			zIndex: 1,
 			horizontalHandleHTML: '<div class="left"></div><div class="right"></div>',
-			verticalHandleHTML: '<div class="top"></div><div class="bottom"></div>'
+			verticalHandleHTML: '<div class="top"></div><div class="bottom"></div>',
+            RTLdirection: false // used to force vertical scrollbar to the left
 		}, opts );
 
 		return this.each(function() {
@@ -853,10 +866,17 @@
 
 				// move the content in the pane over to make room for
 				// the vertical scrollbar
-				$this.css({
-					'width': ($this.width() - trackWidth) + 'px',
-					'padding-right': ( parseInt( $this.css('padding-right'), 10 ) + trackWidth ) + 'px'
-				});
+                if ( settings.RTLdirection ) {
+                    $this.css({
+                        'width': ($this.width() - trackWidth) + 'px',
+                        'padding-left': ( parseInt( $this.css('padding-left'), 10 ) + trackWidth ) + 'px'
+                    });
+                } else {
+                    $this.css({
+                        'width': ($this.width() - trackWidth) + 'px',
+                        'padding-right': ( parseInt( $this.css('padding-right'), 10 ) + trackWidth ) + 'px'
+                    });
+                }
 
 				try {
 
